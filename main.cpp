@@ -1,4 +1,4 @@
-#include <winsock2.h>   // This must come first
+#include <winsock2.h>   // This must come first!
 #include <windows.h>
 #include <iphlpapi.h>
 #include <ws2tcpip.h>
@@ -27,35 +27,39 @@ int main() {
     Banners banner;
     banner.Background = main_background_top();
 
-    // Display banner
-    cout << banner.Background;
+    int run = 1;
 
-    // Variables for TCP table
-    PMIB_TCPTABLE tcpTable;
-    DWORD size = 0;
+    while (run = 1) {
+        // Display banner
+        cout << banner.Background;
 
-    // Ask OS how much space we need
-    if (GetTcpTable(nullptr, &size, TRUE) == ERROR_INSUFFICIENT_BUFFER) {
-        tcpTable = (PMIB_TCPTABLE)malloc(size);
-        if (tcpTable && GetTcpTable(tcpTable, &size, TRUE) == NO_ERROR) {
-            cout << "\nActive TCP Connections:\n";
-            for (DWORD i = 0; i < tcpTable->dwNumEntries; ++i) {
-                IN_ADDR localAddr;
-                localAddr.S_un.S_addr = tcpTable->table[i].dwLocalAddr;
-                IN_ADDR remoteAddr;
-                remoteAddr.S_un.S_addr = tcpTable->table[i].dwRemoteAddr;
+        // Variables for TCP table
+        PMIB_TCPTABLE tcpTable;
+        DWORD size = 0;
 
-                cout << "Local: " << inet_ntoa(localAddr)
-                     << ":" << ntohs((u_short)tcpTable->table[i].dwLocalPort)
-                     << " -> Remote: " << inet_ntoa(remoteAddr)
-                     << ":" << ntohs((u_short)tcpTable->table[i].dwRemotePort)
-                     << "\n";
+        // Ask OS how much space we need
+        if (GetTcpTable(nullptr, &size, TRUE) == ERROR_INSUFFICIENT_BUFFER) {
+            tcpTable = (PMIB_TCPTABLE)malloc(size);
+            if (tcpTable && GetTcpTable(tcpTable, &size, TRUE) == NO_ERROR) {
+                cout << "\nActive TCP Connections:\n";
+                for (DWORD i = 0; i < tcpTable->dwNumEntries; ++i) {
+                    IN_ADDR localAddr;
+                    localAddr.S_un.S_addr = tcpTable->table[i].dwLocalAddr;
+                    IN_ADDR remoteAddr;
+                    remoteAddr.S_un.S_addr = tcpTable->table[i].dwRemoteAddr;
+
+                    cout << "Local: " << inet_ntoa(localAddr)
+                         << ":" << ntohs((u_short)tcpTable->table[i].dwLocalPort)
+                         << " -> Remote: " << inet_ntoa(remoteAddr)
+                         << ":" << ntohs((u_short)tcpTable->table[i].dwRemotePort)
+                         << "\n";
+                }
             }
+            free(tcpTable);
+        } else {
+            cerr << "Failed to determine buffer size for TCP table.\n";
         }
-        free(tcpTable);
-    } else {
-        cerr << "Failed to determine buffer size for TCP table.\n";
     }
-
     return 0;
 }
+
